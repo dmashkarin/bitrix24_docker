@@ -1,0 +1,51 @@
+version: '3'
+services:
+  web:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+      args:
+        USER: bitrix
+        GROUP: bitrix
+        HOSTUID: 197609
+        HOSTGID: 197121
+    ports:
+      - "22:22"
+      - "80:80"
+      - "443:443"
+    extra_hosts:
+      - "push:127.0.0.1"
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
+    privileged: true
+    volumes:
+      - ./upload:/home/bitrix/www/upload
+      - ~/.ssh/id_rsa:/home/bitrix/.ssh/id_rsa
+      - ~/.ssh/id_rsa.pub:/home/bitrix/.ssh/id_rsa.pub
+    environment:
+      USER: bitrix
+      GROUP: bitrix
+      HOSTUID: 197609
+      HOSTGID: 197121
+      PHP_IDE_CONFIG: "serverName=Docker"
+    depends_on:
+      - mysql
+  mysql:
+    image: mariadb
+    healthcheck:
+      test: "/usr/bin/mysql --user=root --password=+Tr+()8]!szl[HQIsoT5 --execute \"SHOW DATABASES;\""
+      interval: 2s
+      timeout: 20s
+      retries: 10
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: +Tr+()8]!szl[HQIsoT5
+      MYSQL_DATABASE: sitemanager
+      MYSQL_USER: bitrix
+      MYSQL_PASSWORD: +Tr+()8]!szl[HQIsoT5
+    command: ['--character-set-server=utf8', '--collation-server=utf8_unicode_ci', '--skip-character-set-client-handshake', '--sql-mode=']

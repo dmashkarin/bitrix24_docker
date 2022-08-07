@@ -1,0 +1,5 @@
+identity = cp-docker@web_team.ru
+hostname = localhost
+username = "test_user"
+password = "test_pass"
+mda = "mailx"
