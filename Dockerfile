@@ -1,28 +1,27 @@
-FROM centos:8
+FROM redhat/ubi8:8.5
 RUN set -eux \
-    && cd /etc/yum.repos.d/ \
-    && sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* \
-    && sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-* \
     && rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm \
     && dnf install -y https://rpms.remirepo.net/enterprise/remi-release-8.rpm \
     && dnf module enable php:remi-7.3 -y \
-    && dnf install -y php php-cli php-common php-json php-iconv \
+    && dnf install -y php php-cli php-common php-json php-iconv procps
+RUN set -eux \
     && yum update -y \
     && yum install -y wget python3 npm \
-        redis nano sudo \
-        curl cronie ca-certificates openssl \
+        nano \
+        sudo \
+        cronie \
         openssh \
         curl-devel \
         expat-devel \
-        gettext-devel \
         openssl-devel \
         zlib-devel \
         pcre-devel \
-        kernel-devel \
-        bind \
         bind-utils \
         nginx \
-    && yum install -y supervisor \
+    && dnf module reset redis -y \
+    && dnf --enablerepo=remi-modular-test module enable redis:remi-6.0 -y\
+    && dnf --enablerepo=remi-modular-test module install redis:remi-6.0 -y \
+    yum install -y supervisor \
     && yum clean -y all \
     && dnf install -y php-intl \
     php-ftp \
@@ -52,7 +51,7 @@ RUN set -eux \
     php-exif \
     php-opcache \
     php-ldap \
-    esmtp \
+#    esmtp \
     && mkdir /run/php-fpm/ \
     && rm -rf /var/cache/yum/* \
     && ln -fs /usr/share/zoneinfo/Europe/Moscow /etc/localtime
@@ -106,7 +105,7 @@ RUN set -eux \
     && echo '* * * * * /home/bitrix/www/bitrix/modules/main/tools/cron_events.php && date >> /var/log/bitrix_cron.log' > /var/spool/cron/bitrix \
     && yum remove -y $BUILD_PACKAGE \
     && rm -rf /var/cache/yum/* \
-    && dnf install -y postfix cyrus-sasl-plain git lsb openssh-server
+    && dnf install -y postfix cyrus-sasl-plain git openssh-server
 
 COPY ./www /home/bitrix/www
 
