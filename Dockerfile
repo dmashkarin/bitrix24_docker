@@ -21,7 +21,7 @@ RUN set -eux \
     && dnf module reset redis -y \
     && dnf --enablerepo=remi-modular-test module enable redis:remi-6.0 -y\
     && dnf --enablerepo=remi-modular-test module install redis:remi-6.0 -y \
-    yum install -y supervisor \
+    && yum install -y supervisor \
     && yum clean -y all \
     && dnf install -y php-intl \
     php-ftp \
