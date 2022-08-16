@@ -43,3 +43,9 @@ www - ядро битрикса + кодовая база проекта без 
 Остальное можно посмотреть по видео
 
 https://www.youtube.com/watch?v=XszBIW4sPHk
+
+
+Если при запуске контейнера mysql начинают валиться ошибки, нужно в файле docker-compose
+заменить значение переменной MYSQL_USER на root или запустить изнутри контейнера команду 
+
+        mysql_upgrade --user=root --password=<root_pwd>

@@ -45,6 +45,8 @@ services:
     volumes:
       - ./mysql:/var/lib/mysql
     environment:
+      MARIADB_AUTO_UPGRADE: "1"
+      MARIADB_INITDB_SKIP_TZINFO: "1"
       MYSQL_ROOT_PASSWORD: +Tr+()8]!szl[HQIsoT5
       MYSQL_DATABASE: sitemanager
       MYSQL_USER: bitrix
