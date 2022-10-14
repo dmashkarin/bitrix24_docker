@@ -107,8 +107,8 @@ RUN set -eux \
     && rm -rf /var/cache/yum/* \
     && dnf install -y postfix cyrus-sasl-plain git openssh-server
 
-COPY ./www /home/bitrix/www
-RUN chown -R bitrix: /home/bitrix/www
+
+COPY --chown=bitrix:bitrix ./www /home/bitrix/www
 
 COPY ./bx_push/etc /etc
 COPY ./bx_push/init_script.php /home/bitrix/init_script.php
