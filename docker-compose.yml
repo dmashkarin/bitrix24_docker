@@ -7,8 +7,8 @@ services:
       args:
         USER: bitrix
         GROUP: bitrix
-        HOSTUID: 197609
-        HOSTGID: 197121
+        HOSTUID: 1096584
+        HOSTGID: 1049089
     ports:
       - "22:22"
       - "80:80"
@@ -21,15 +21,15 @@ services:
       - seccomp:unconfined
     privileged: true
     volumes:
-#      - ./www:/home/bitrix/www
+      - ./www:/home/bitrix/www
       - ./upload:/home/bitrix/www/upload
       - ~/.ssh/id_rsa:/home/bitrix/.ssh/id_rsa
       - ~/.ssh/id_rsa.pub:/home/bitrix/.ssh/id_rsa.pub
     environment:
       USER: bitrix
       GROUP: bitrix
-      HOSTUID: 197609
-      HOSTGID: 197121
+      HOSTUID: 1096584
+      HOSTGID: 1049089
       PHP_IDE_CONFIG: "serverName=Docker"
     depends_on:
       - mysql

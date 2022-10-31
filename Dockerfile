@@ -118,14 +118,15 @@ COPY ./bx_push/entrypoint.sh /entrypoint.sh
 
 RUN chown postfix: /usr/sbin/postfix \
     && chown bitrix: /etc/sysconfig/push-server-multi \
+    && tr -d '\r' < /etc/init.d/push-server-multi > /etc/init.d/push-server-multi \
     && /etc/init.d/push-server-multi configs pub \
     && /etc/init.d/push-server-multi configs sub \
     && chmod +x /entrypoint.sh \
     && chmod +x /home/bitrix/init_script.php \
     && chmod +x /var/spool/cron/bitrix \
     && rm -f /run/nologin \
-#    && cd /etc/ssh \
-#    && ssh-keygen -t rsa -f ssh_host_rsa_key
+    && cd /etc/ssh \
+    && ssh-keygen -t rsa -f ssh_host_rsa_key
 
 #RUN chmod 755 `find /home/bitrix/www -type d` \
 #    && chmod 644 `find /home/bitrix/www -type f`
