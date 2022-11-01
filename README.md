@@ -6,7 +6,7 @@
 2. Добавить подмодули - git submodule add --force git@gitlab.....ls.git local/modules/....
 3. Локально почистить кеш ./www/bitrix/cache,
 4. Локально установить composer зависимости.
-5. Локально установить npm зависимости
+~~5. Локально установить npm зависимости~~
 6. Прописать настройки БД ./www/bitrix/.settings.php ./www/bitrix/php_interface  
 (host: 'mysql' login: 'root' pass: '+Tr+()8]!szl[HQIsoT5')
 7. Заменить константы и аргументы HOSTUID HOSTGID в файле docker-compose.yml на свои

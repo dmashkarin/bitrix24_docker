@@ -21,7 +21,7 @@ services:
       - seccomp:unconfined
     privileged: true
     volumes:
-      - ./www:/home/bitrix/www
+#      - ./www:/home/bitrix/www
       - ./upload:/home/bitrix/www/upload
       - ~/.ssh/id_rsa:/home/bitrix/.ssh/id_rsa
       - ~/.ssh/id_rsa.pub:/home/bitrix/.ssh/id_rsa.pub
