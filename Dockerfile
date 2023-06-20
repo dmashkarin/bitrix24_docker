@@ -126,10 +126,10 @@ RUN cd /home/bitrix/www \
     && chmod +x /entrypoint.sh \
     && chmod +x /home/bitrix/init_script.php \
     && chmod +x /var/spool/cron/bitrix \
-    && rm -f /run/nologin
-#    && cd /etc/ssh \
-#    && ssh-keygen -t rsa -f ssh_host_rsa_key -y \
-#    && chmod 400 ssh_host_rsa_key
+    && rm -f /run/nologin \
+    cd /etc/ssh \
+    && ssh-keygen -q -t rsa -N '' -f ssh_host_rsa_key \
+    && chmod 400 ssh_host_rsa_key
 
 #RUN chmod 755 `find /home/bitrix/www -type d` \
 #    && chmod 644 `find /home/bitrix/www -type f`
