@@ -111,6 +111,8 @@ RUN set -eux \
 COPY --chown=bitrix:bitrix ./cp_core /home/bitrix/cp_core
 COPY --chown=bitrix:bitrix ./www /home/bitrix/www
 COPY --chown=bitrix:bitrix ./calltouch /home/bitrix/calltouch
+COPY --chown=bitrix:bitrix ./symlink_update.sh /home/bitrix
+COPY --chown=bitrix:bitrix ./symlink_update_calltouch.sh /home/bitrix
 
 COPY ./bx_push/etc /etc
 COPY ./bx_push/init_script.php /home/bitrix/init_script.php
@@ -138,6 +140,12 @@ RUN cd /home/bitrix/www \
     && chown bitrix: /home/bitrix/www/bitrix \
     && chown bitrix: /home/bitrix/calltouch/bitrix \
     && chown bitrix: /home/bitrix/calltouch/upload
+
+RUN cd /home/bitrix \
+    && ./symlink_update.sh \
+    && ./symlink_update_calltouch.sh \
+    && cd /home/bitrix/www/deploy \
+    && ./create_links.sh
 
 
 
