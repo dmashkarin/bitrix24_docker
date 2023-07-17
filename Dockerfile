@@ -108,7 +108,11 @@ RUN set -eux \
     && dnf install -y postfix cyrus-sasl-plain git openssh-server
 
 
+COPY --chown=bitrix:bitrix ./cp_core /home/bitrix/cp_core
 COPY --chown=bitrix:bitrix ./www /home/bitrix/www
+COPY --chown=bitrix:bitrix ./calltouch /home/bitrix/calltouch
+COPY --chown=bitrix:bitrix ./symlink_update.sh /home/bitrix
+COPY --chown=bitrix:bitrix ./symlink_update_calltouch.sh /home/bitrix
 
 COPY ./bx_push/etc /etc
 COPY ./bx_push/init_script.php /home/bitrix/init_script.php
@@ -126,10 +130,25 @@ RUN cd /home/bitrix/www \
     && chmod +x /entrypoint.sh \
     && chmod +x /home/bitrix/init_script.php \
     && chmod +x /var/spool/cron/bitrix \
-    && rm -f /run/nologin
-#    && cd /etc/ssh \
-#    && ssh-keygen -t rsa -f ssh_host_rsa_key -y \
-#    && chmod 400 ssh_host_rsa_key
+    && rm -f /run/nologin \
+    && cd /etc/ssh \
+    && ssh-keygen -q -t rsa -N '' -f ssh_host_rsa_key \
+    && chmod 400 ssh_host_rsa_key \
+    && ln -s /home/bitrix/cp_core/bitrix /home/bitrix/www/bitrix \
+    && ln -s /home/bitrix/cp_core/bitrix /home/bitrix/calltouch/bitrix \
+    && ln -s /home/bitrix/www/upload /home/bitrix/calltouch/upload \
+    && chown bitrix: /home/bitrix/www/bitrix \
+    && chown bitrix: /home/bitrix/calltouch/bitrix \
+    && chown bitrix: /home/bitrix/calltouch/upload
+
+RUN cd /home/bitrix \
+    && ./symlink_update.sh \
+    && ./symlink_update_calltouch.sh \
+    && cd /home/bitrix/www/deploy \
+    && ./create_links.sh
+
+
+
 
 #RUN chmod 755 `find /home/bitrix/www -type d` \
 #    && chmod 644 `find /home/bitrix/www -type f`
