@@ -7,8 +7,8 @@ services:
       args:
         USER: bitrix
         GROUP: bitrix
-        HOSTUID: 1096584
-        HOSTGID: 1049089
+        HOSTUID: 197613
+        HOSTGID: 197613
     ports:
       - "22:22"
       - "80:80"
@@ -22,34 +22,43 @@ services:
       - seccomp:unconfined
     privileged: true
     volumes:
-#      - ./www:/home/bitrix/www
+      - ./www:/home/bitrix/www
       - ./upload:/home/bitrix/www/upload
+      - ./bx_push/etc/php-fpm/www.conf:/etc/php/8.1/fpm/php-fpm.conf
+      - ./bx_push/etc/php.d/10-opcache.ini:/etc/php/8.1/fpm/conf.d/10-opcache.ini
+      - ./bx_push/etc/php.d/15-xdebug.ini:/etc/php/8.1/fpm/conf.d/15-xdebug.ini
+      - ./bx_push/etc/php.d/zx-bitrix.ini:/etc/php/8.1/fpm/conf.d/zx-bitrix.ini
       - ~/.ssh/id_rsa:/home/bitrix/.ssh/id_rsa
       - ~/.ssh/id_rsa.pub:/home/bitrix/.ssh/id_rsa.pub
     environment:
       USER: bitrix
       GROUP: bitrix
-      HOSTUID: 1096584
-      HOSTGID: 1049089
+      HOSTUID: 197613
+      HOSTGID: 197613
       PHP_IDE_CONFIG: "serverName=Docker"
     depends_on:
       - mysql
   mysql:
-    image: mariadb
-    healthcheck:
-      test: "/usr/bin/mysql --user=root --password=+Tr+()8]!szl[HQIsoT5 --execute \"SHOW DATABASES;\""
-      interval: 2s
-      timeout: 20s
-      retries: 10
+    image: mysql:5.7
+    restart: always
     ports:
       - "3306:3306"
     volumes:
       - ./mysql:/var/lib/mysql
     environment:
-      MARIADB_AUTO_UPGRADE: "1"
-      MARIADB_INITDB_SKIP_TZINFO: "1"
       MYSQL_ROOT_PASSWORD: +Tr+()8]!szl[HQIsoT5
       MYSQL_DATABASE: sitemanager
       MYSQL_USER: bitrix
       MYSQL_PASSWORD: +Tr+()8]!szl[HQIsoT5
-    command: ['--character-set-server=utf8', '--collation-server=utf8_unicode_ci', '--skip-character-set-client-handshake', '--sql-mode=']
+    command: [
+      '--character-set-server=utf8',
+      '--collation-server=utf8_unicode_ci',
+      '--skip-character-set-client-handshake',
+      '--sql-mode=',
+      '--innodb_strict_mode=OFF',
+      '--slow_query_log=ON',
+      '--long-query-time=0',
+      '--log-output=TABLE',
+      '--log-slow-admin-statements=ON',
+      '--slow-launch-time=0'
+    ]

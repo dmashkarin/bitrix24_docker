@@ -82,9 +82,13 @@ echo "TRY TO CHANGE PUSH_SERVER_KEY=$PUSH_SERVER_SECURITY_KEY.."
 php -d mbstring.func_overload=0 -d opcache.enable_cli=0 -d opcache.enable=0 /home/bitrix/init_script.php
 
 echo "START SUPERVISOR"
-supervisord -n -c /etc/supervisord.conf
+service redis-server start
+service php8.1-fpm start
+nginx -g 'daemon off;'
 
-echo "git pull/checkout"
-git checkout release
-git fetch --all
-git pull
+#supervisord -n -c /etc/supervisord.conf
+
+#echo "git pull/checkout"
+#git checkout release
+#git fetch --all
+#git pull
