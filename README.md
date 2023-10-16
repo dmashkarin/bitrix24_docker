@@ -58,3 +58,5 @@ https://www.youtube.com/watch?v=XszBIW4sPHk
 заменить значение переменной MYSQL_USER на root или запустить изнутри контейнера команду 
 
         mysql_upgrade --user=root --password=<root_pwd>
+
+прописать локальный домен, что бы корректно подтягивался шаблон bitrix/admin/site_edit.php?lang=ru&LID=s1&tabControl_active_tab=edit1

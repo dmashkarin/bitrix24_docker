@@ -1,10 +1,13 @@
 FROM debian:bullseye-slim
 ARG HOSTUID
+ARG HOSTGID
 
 ENV NGINX_VERSION   1.22.1
 
 RUN set -eux \
     && useradd -m -u $HOSTUID bitrix \
+    && groupadd -g $HOSTGID bitrix_releaser \
+    && usermod -g bitrix_releaser bitrix \
     && apt-get update \
     && apt-get install --no-install-recommends --no-install-suggests -y \
         python3 \
@@ -25,8 +28,7 @@ RUN set -eux \
         zlib1g \
         zlib1g-dev \
         lsb-release \
-        apt-transport-https \
-        supervisor
+        apt-transport-https
 
 WORKDIR /opt/
 COPY --chown=bitrix:bitrix_releaser ./install/nginx-${NGINX_VERSION} /opt/nginx-${NGINX_VERSION}
@@ -81,7 +83,6 @@ RUN wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 
 
 ENV NVM_DIR /usr/local/nvm
-ENV NODE_VERSION 18.18.1
 ENV NODE_MAJOR 18
 
 RUN apt-get update \
@@ -96,37 +97,39 @@ WORKDIR /opt
 
 RUN set -eux \
 #    && BUILD_PACKAGE="wget make gcc gcc-c++ checkpolicy policycoreutils" \
-    && BUILD_PACKAGE="wget make gcc checkpolicy policycoreutils" \
-    && apt-get install -y redis $BUILD_PACKAGE \
-    && usermod -g bitrix redis \
-    && chown redis:redis /var/log/redis/ \
-    && echo -e '[Service]\nGroup=bitrix' > /etc/systemd/system/redis.service.d/custom.conf \
-    && wget https://repos.1c-bitrix.ru/vm/push-server-0.2.2.tgz \
-    && npm install --production ./push-server-0.2.2.tgz \
-    && rm -f push-server-0.2.2.tgz bitrix-push-server \
+    && BUILD_PACKAGE="wget make gcc g++ checkpolicy policycoreutils" \
+    && apt-get install -y redis sudo nano cron $BUILD_PACKAGE \
+    && usermod -g bitrix_releaser redis \
+    && chown redis:bitrix_releaser /var/log/redis/ \
+    && sed -i -e 's/Group=redis/Group=bitrix_releaser/g' /lib/systemd/system/redis-server.service \
+#    && echo -e '[Service]\nGroup=bitrix' > /etc/systemd/system/redis.service.d/custom.conf \
+#    && wget https://repos.1c-bitrix.ru/vm/push-server-0.2.2.tgz \
+    && wget https://repos.1c-bitrix.ru/vm/push-server-0.3.0.tgz \
+    && npm install --production ./push-server-0.3.0.tgz \
+    && rm -f push-server-0.3.0.tgz bitrix-push-server \
     && cd /opt/node_modules/push-server \
     && cp -R ./etc/init.d/* /etc/init.d/ \
     && cp -R ./etc/push-server/ /etc/ \
-    && cp -R ./etc/sysconfig/* /etc/sysconfig/ \
+    && cp -R ./etc/sysconfig /etc/sysconfig \
     && chmod 440 /etc/sysconfig/push-server-multi \
-    && chown bitrix:root /etc/sysconfig/push-server-multi \
+    && chown bitrix:bitrix_releaser /etc/sysconfig/push-server-multi \
     && ln -sf /opt/node_modules/push-server/logs /var/log/push-server \
     && ln -sf /opt/node_modules/push-server/etc/push-server /etc/push-server \
     && ln -sf /opt/node_modules/push-server /opt/push-server \
-    && echo 'd /tmp/push-server 0770 bitrix bitrix -' > /etc/tmpfiles.d/push-server.conf \
+    && echo 'd /tmp/push-server 0770 bitrix bitrix_releaser -' > /etc/tmpfiles.d/push-server.conf \
     && systemd-tmpfiles --remove --create \
-    && usermod -aG wheel bitrix \
-    && chown bitrix:root /opt/node_modules/push-server/logs \
+    && usermod -aG sudo bitrix \
+    && chown bitrix:bitrix_releaser /opt/node_modules/push-server/logs \
     && cd /opt/push-server \
     && npm install \
-    && chown -R bitrix:bitrix /opt/push-server \
+    && chown -R bitrix:bitrix_releaser /opt/push-server \
     && ln -sf /opt/data /opt/node_modules/push-server/data \
-    && usermod -aG bitrix nginx \
+#    && usermod -aG bitrix nginx \
     && mkdir -p /home/bitrix \
-    && chown bitrix:bitrix /home/bitrix/ \
+    && chown bitrix:bitrix_releaser /home/bitrix/ \
     && mkdir -p /home/bitrix/tmp \
     && chmod 770 /home/bitrix/tmp \
-    && chown bitrix:bitrix /home/bitrix/tmp \
+    && chown bitrix:bitrix_releaser /home/bitrix/tmp \
 #catdoc нужен для поиска по содержимому документов
     && cd /tmp \
     && wget http://ftp.wagner.pp.ru/pub/catdoc/catdoc-0.95.tar.gz \
@@ -137,10 +140,12 @@ RUN set -eux \
     && make install \
     && rm -rf /tmp/catdoc-0.95 \
     && rm /tmp/catdoc-0.95.tar.gz \
-    && echo '* * * * * /home/bitrix/www/bitrix/modules/main/tools/cron_events.php && date >> /var/log/bitrix_cron.log' > /var/spool/cron/bitrix \
-    && apt-get remove -y $BUILD_PACKAGE \
-    && rm -rf /var/cache/yum/* \
-    && apt-get install -y postfix cyrus-sasl-plain git openssh-server
+    && mkdir -p /var/spool/cron/ \
+    && echo '* * * * * /home/bitrix/www/bitrix/modules/main/tools/cron_events.php && date >> /var/log/bitrix_cron.log' > /var/spool/cron/crontabs/bitrix \
+    && apt-get remove -y $BUILD_PACKAGE
+
+#RUN apt-get install -y postfix git openssh-server
+#    cyrus-sasl-plain
 
 
 
@@ -148,7 +153,6 @@ RUN set -eux \
 
 RUN set -eux \
     && cd /home/bitrix \
-    && mkdir tmp \
     && chmod 771 tmp
 #    && chown -R bitrix:bitrix_releaser /home/bitrix \
 #    && rm -rf /opt/* \
@@ -169,12 +173,15 @@ RUN set -eux \
 #
 
 COPY --chown=bitrix:bitrix_releaser ./bx_push/entrypoint.sh /entrypoint.sh
+COPY --chown=bitrix:bitrix_releaser ./bx_push/init_script.php /home/bitrix/init_script.php
+COPY ./bx_push/lib/systemd/system/redis-server.service /lib/systemd/system/redis-server.service
+COPY ./bx_push/lib/systemd/system/php8.1-fpm.service /lib/systemd/system/php8.1-fpm.service
 
 RUN chmod +x /entrypoint.sh
 
 EXPOSE 80
 EXPOSE 443
 
-WORKDIR /home/bitrix/web/mo.loc/public_html/current
+WORKDIR /home/bitrix/www/
 
 ENTRYPOINT /entrypoint.sh

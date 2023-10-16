@@ -1,10 +1,9 @@
 #!/bin/bash
-
 #Для запуска на linux системах необходимо решить конфликт доступа к файлам, которые подключаются в контейнер через volume
 #Для этого подменяется id пользователя bitrix внутри контейнера на id внешнего владельца файлов
 # >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >
 
-#docker entrypint script
+#docker entrypoint script
 #for sync uid:gid host<->container
 
 #usage
@@ -51,22 +50,22 @@ default() {
 #default
 
 chown bitrix:redis /var/log/redis/
-chown bitrix: /etc/sysconfig/push-server-multi
-chown bitrix: /opt/node_modules/push-server/logs
-chown -R bitrix: /opt/push-server
-chown bitrix: /home/bitrix/
-chown bitrix: /home/bitrix/tmp
-chown bitrix: /etc/sysconfig/push-server-multi
-chown bitrix: /tmp/push-server
+chown bitrix:bitrix_releaser /etc/sysconfig/push-server-multi
+chown bitrix:bitrix_releaser /opt/node_modules/push-server/logs
+chown -R bitrix:bitrix_releaser /opt/push-server
+chown bitrix:bitrix_releaser /home/bitrix/
+chown bitrix:bitrix_releaser /home/bitrix/tmp
+chown bitrix:bitrix_releaser /etc/sysconfig/push-server-multi
+chown bitrix:bitrix_releaser /tmp/push-server
 chmod 755 /home/bitrix/
 chmod 400 /home/bitrix/.ssh/id_rsa
 chmod 600 /home/bitrix/.ssh/id_rsa.pub
-chown bitrix: /home/bitrix/.ssh/id_rsa
-chown bitrix: /home/bitrix/.ssh/id_rsa.pub
+chown bitrix:bitrix_releaser /home/bitrix/.ssh/id_rsa
+chown bitrix:bitrix_releaser /home/bitrix/.ssh/id_rsa.pub
 chmod 644 /etc/ssh/ssh_host_dsa_key.pub /etc/ssh/ssh_host_ecdsa_key.pub /etc/ssh/ssh_host_ed25519_key.pub /etc/ssh/ssh_host_rsa_key.pub
 chmod 600 /etc/ssh/ssh_host_dsa_key /etc/ssh/ssh_host_ecdsa_key /etc/ssh/ssh_host_ed25519_key /etc/ssh/ssh_host_rsa_key
 cat /home/bitrix/.ssh/id_rsa.pub > /home/bitrix/.ssh/authorized_keys
-chown bitrix: /home/bitrix/.ssh/authorized_keys
+chown bitrix:bitrix_releaser /home/bitrix/.ssh/authorized_keys
 chmod 600 /home/bitrix/.ssh/authorized_keys
 
 
@@ -81,9 +80,11 @@ PUSH_SERVER_SECURITY_KEY=$(cat /etc/sysconfig/push-server-multi | grep KEY | cut
 echo "TRY TO CHANGE PUSH_SERVER_KEY=$PUSH_SERVER_SECURITY_KEY.."
 php -d mbstring.func_overload=0 -d opcache.enable_cli=0 -d opcache.enable=0 /home/bitrix/init_script.php
 
-echo "START SUPERVISOR"
+echo "START REDIS"
 service redis-server start
+echo "START PHP"
 service php8.1-fpm start
+echo "START NGINX"
 nginx -g 'daemon off;'
 
 #supervisord -n -c /etc/supervisord.conf

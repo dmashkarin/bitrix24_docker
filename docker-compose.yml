@@ -23,11 +23,16 @@ services:
     privileged: true
     volumes:
       - ./www:/home/bitrix/www
+      - ./cp_core/bitrix:/home/bitrix/www/bitrix
       - ./upload:/home/bitrix/www/upload
       - ./bx_push/etc/php-fpm/www.conf:/etc/php/8.1/fpm/php-fpm.conf
       - ./bx_push/etc/php.d/10-opcache.ini:/etc/php/8.1/fpm/conf.d/10-opcache.ini
-      - ./bx_push/etc/php.d/15-xdebug.ini:/etc/php/8.1/fpm/conf.d/15-xdebug.ini
+      - ./bx_push/etc/php.d/20-xdebug.ini:/etc/php/8.1/fpm/conf.d/20-xdebug.ini
       - ./bx_push/etc/php.d/zx-bitrix.ini:/etc/php/8.1/fpm/conf.d/zx-bitrix.ini
+      - ./bx_push/etc/php.d/10-opcache.ini:/etc/php/8.1/cli/conf.d/10-opcache.ini
+      - ./bx_push/etc/php.d/20-xdebug.ini:/etc/php/8.1/cli/conf.d/20-xdebug.ini
+      - ./bx_push/etc/php.d/zx-bitrix.ini:/etc/php/8.1/cli/conf.d/zx-bitrix.ini
+      - ./bx_push/etc/redis/redis.conf:/etc/redis/redis.conf
       - ~/.ssh/id_rsa:/home/bitrix/.ssh/id_rsa
       - ~/.ssh/id_rsa.pub:/home/bitrix/.ssh/id_rsa.pub
     environment:

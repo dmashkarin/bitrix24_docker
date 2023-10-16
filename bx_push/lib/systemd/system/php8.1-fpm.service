@@ -5,7 +5,7 @@ After=network.target
 
 [Service]
 Type=notify
-ExecStart=/usr/sbin/php-fpm8.1 --nodaemonize --fpm-config /etc/php/8.1/fpm/php-fpm.conf
+ExecStart=/usr/sbin/php-fpm8.1 --daemonize --fpm-config /etc/php/8.1/fpm/php-fpm.conf
 ExecStartPost=-/usr/lib/php/php-fpm-socket-helper install /run/php/php-fpm.sock /etc/php/8.1/fpm/pool.d/www.conf 81
 ExecStopPost=-/usr/lib/php/php-fpm-socket-helper remove /run/php/php-fpm.sock /etc/php/8.1/fpm/pool.d/www.conf 81
 ExecReload=/bin/kill -USR2 $MAINPID
